@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aplikasi Undian SiRISMA</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    font-family: 'Montserrat', sans-serif;
+    background: #f0f0f0;
+  }
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  header {
+  background: #3f51b5;
+  color: white;
+  padding: 1rem 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.header-top {
+  text-align: center;
+  margin-top: 1rem;
+}
+  
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.logo-kiri {
+  position: absolute;
+  left: 0;
+  height: 40px;
+}
+
+.logo-tengah {
+  height: 60px;
+  margin-bottom: 1rem;
+}
+
+  nav {
+    display:flex;
+    background:#303f9f;
+  }
+  nav button {
+    flex:1;
+    padding:1rem;
+    background:transparent;
+    color:white;
+    border:none;
+    cursor:pointer;
+    font-size:1rem;
+    font-weight: 600;
+  }
+  nav button.active {
+    background:#1a237e;
+  }
+  main {
+    flex-grow: 1;
+    padding:1rem;
+  }
+  .hidden { display:none; }
+  /* ===== Table Styling for listPeserta and history ===== */
+table {
+  width: 100%; /* Ensure the table takes full width */
+  border-collapse: collapse; /* Collapse borders */
+  font-size: 0.9rem; /* Set font size */
+  background: white; /* Background color for the table */
+}
+th, td {
+  border: 1px solid #ccc; /* Border for table cells */
+  padding: 0.5rem 0.8rem; /* Padding for table cells */
+  text-align: left; /* Align text to the left */
+}
+th {
+  background: #eee; /* Background color for header */
+  font-weight: 700; /* Bold font for header */
+  position: sticky; /* Make header sticky */
+  top: 0; /* Stick to the top */
+  z-index: 1; /* Ensure it is above other content */
+}
+#listPeserta {
+  margin-top: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+}
+  /* Input Section */
+  #pageInput input[type="file"] {
+    margin-top: 1rem;
+  }
+  /* Form inputs for kode kantor & nomor undian */
+  .input-grid {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+  .kode-kantor, .nomor-undian {
+    width: 3rem;
+    padding: 0.5rem;
+    font-size: 1.3rem;
+    text-align: center;
+    border-radius: 5px;
+    border: 1px solid #999;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  select#kategoriHadiah {
+    font-size: 1rem;
+    padding: 0.6rem;
+    margin: 0.5rem auto 1rem auto;
+    width: 220px;
+    display: block;
+    border-radius: 6px;
+    border: 1px solid #999;
+    font-weight: 600;
+  }
+
+  /* Center labels horizontally inside pageUndian */
+  #pageUndian {
+    text-align: center;
+  }
+  #pageUndian label {
+    display: inline-block;
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+  }
+
+  /* Buttons */
+  #btnUndi {
+    display: block;
+    margin: 0 auto;
+    background-color: #4caf50;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding: 15px 32px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 6px 12px rgb(76 175 80 / 0.5);
+    transition: background-color 0.3s ease, transform 0.15s ease;
+  }
+  #btnUndi:hover {
+    background-color: #388e3c;
+    transform: translateY(-2px);
+  }
+  #btnUndi:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 6px rgb(56 142 60 / 0.8);
+  }
+
+  #btnResetHistory, #btnExportXLSX {
+    background-color: #3f51b5;
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-right: 1rem;
+    transition: background-color 0.3s ease;
+  }
+  #btnResetHistory {
+    background-color: #e53935;
+  }
+  #btnResetHistory:hover {
+    background-color: #b71c1c;
+  }
+  #btnExportXLSX:hover {
+    background-color: #2c387e;
+  }
+
+  /* === Popup Styled as Fullscreen Overlay === */
+  #popup {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  #popupContent {
+    position: relative;
+    background: white;
+    padding: 30px 40px;
+    border-radius: 10px;
+    width: 660px;
+    max-width: 95vw;
+    height: 420px;
+    box-sizing: border-box;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+  }
+
+  #closeBtn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 28px;
+    font-weight: 700;
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+  #closeBtn:hover {
+    color: #000;
+  }
+
+  #labelSelamat {
+    font-size: 22px;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 15px;
+  }
+
+  #winnerName {
+    font-size: 48px;
+    font-weight: 900;
+    color: #1565c0;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    min-height: 60px;
+  }
+
+  #officeCodeContainer,
+  #lotteryNumberContainer,
+  #addressContainer {
+    font-weight: 600;
+    color: #333;
+    margin: 6px 0;
+  }
+  #labelPrizeTitle {
+    margin-top: 25px;
+    font-weight: 700;
+    font-size: 18px;
+    color: #d32f2f;
+  }
+  #prizeName {
+    font-weight: 900;
+    font-size: 30px;
+    color: #03ac13;
+    margin-top: 5px;
+  }
+
+  #fireworksCanvas {
+    position: absolute;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 1000;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    display: none;
+  }
+
+</style>
+</head>
+<body>
+  
+<header>
+  <div class="header-container">
+    <img class="logo-kiri" src="https://drive.google.com/thumbnail?id=1mwWHSAiFXuJZA4O99x3_oopB5Mmz2x6V&sz=w1000" alt="Logo Kiri" style="height: 60px;">
+<img class="logo-tengah" src="https://drive.google.com/thumbnail?id=1FF4-Lhmq6uRIkEUI9t70CHbxxfzwSCEQ&sz=w1000" alt="Logo Tengah" style="height: 150px;">
+  </div>
+</header>
+
+<nav>
+    <button id="btnInput" class="active">Input Peserta</button>
+    <button id="btnUndian">Proses Undian</button>
+    <button id="btnHistory">Riwayat</button>
+</nav>
+
+<main>
+  <!-- Halaman Input -->
+  <section id="pageInput">
+    <h2>Input Peserta dari CSV</h2>
+    <input type="file" id="csvFile" accept=".csv" />
+    <div id="listPeserta">
+      <table>
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Kode Kantor</th>
+            <th>Nomor Undian</th>
+            <th>Nama Peserta</th>
+            <th>Alamat Peserta</th>
+          </tr>
+        </thead>
+        <tbody id="listPesertaBody">
+          <tr><td colspan="5" style="text-align:center; font-style:italic;">Belum ada peserta</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Halaman Undian -->
+  <section id="pageUndian" class="hidden">
+
+    <label for="kategoriHadiah">Kategori Hadiah:</label>
+    <select id="kategoriHadiah">
+      <option value="" disabled selected>Pilih kategori hadiah</option>
+      <option value="Uang Tunai 50 ribu">Uang Tunai 50 ribu</option>
+      <option value="Uang Tunai 300 ribu">Uang Tunai 300 ribu</option>
+      <option value="Televisi">Televisi</option>
+      <option value="Kulkas">Kulkas</option>
+      <option value="Sepeda Motor">Sepeda Motor</option>
+    </select>
+
+    <label for="kodeKantor1">Kode Kantor:</label>
+    <div class="input-grid">
+      <input id="kodeKantor1" maxlength="1" class="kode-kantor" />
+      <input maxlength="1" class="kode-kantor" />
+    </div>
+
+    <label>Nomor Undian:</label>
+    <div class="input-grid">
+      <input maxlength="1" class="nomor-undian" />
+      <input maxlength="1" class="nomor-undian" />
+      <input maxlength="1" class="nomor-undian" />
+      <input maxlength="1" class="nomor-undian" />
+    </div>
+
+    <button id="btnUndi">CARI PEMENANG</button>
+  </section>
+
+  <!-- Halaman Riwayat -->
+  <section id="pageHistory" class="hidden">
+    <h2>Riwayat Pemenang</h2>
+    <div style="margin-bottom:1rem;">
+      <button id="btnResetHistory">Reset Riwayat</button>
+      <button id="btnExportXLSX">Export XLSX</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Kode Kantor</th>
+          <th>Nomor Undian</th>
+          <th>Nama Peserta</th>
+          <th>Alamat Peserta</th>
+          <th>Kategori Hadiah</th>
+          <th>Waktu Undi</th>
+        </tr>
+      </thead>
+      <tbody id="historyTableBody">
+        <tr><td colspan="7" style="text-align:center; font-style:italic;">Belum ada pemenang</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<!-- Popup untuk hasil undian -->
+<div id="popup" role="alert" aria-modal="true" aria-live="polite" aria-hidden="true" tabindex="-1">
+  <div id="popupContent" tabindex="0">
+    <canvas id="fireworksCanvas"></canvas>
+    <button id="closeBtn" aria-label="Tutup popup">&times;</button>
+    <div id="labelSelamat">Selamat Kepada:</div>
+    <div id="winnerName"></div>
+
+    <div id="officeCodeContainer" class="hidden">
+      <strong>Kode Kantor:</strong> <span id="officeCode"></span>
+    </div>
+    <div id="lotteryNumberContainer" class="hidden">
+      <strong>Nomor Undian:</strong> <span id="lotteryNumber"></span>
+    </div>
+    <div id="addressContainer" class="hidden">
+      <strong>Alamat:</strong> <span id="address"></span>
+    </div>
+
+    <div id="labelPrizeTitle">Anda mendapatkan hadiah berupa:</div>
+    <div id="prizeName"></div>
+  </div>
+</div>
+
+<!-- Bundle SheetJS for XLSX export -->
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/shim.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+<script>
+  // Variabel DOM utama
+  const btnInput = document.getElementById('btnInput');
+  const btnUndian = document.getElementById('btnUndian');
+  const btnHistory = document.getElementById('btnHistory');
+
+  const pageInput = document.getElementById('pageInput');
+  const pageUndian = document.getElementById('pageUndian');
+  const pageHistory = document.getElementById('pageHistory');
+
+  const csvFile = document.getElementById('csvFile');
+  const listPesertaBody = document.getElementById('listPesertaBody');
+
+  const kategoriHadiahSelect = document.getElementById('kategoriHadiah');
+
+  const kodeKantorInputs = Array.from(document.querySelectorAll('.kode-kantor'));
+  const nomorUndianInputs = Array.from(document.querySelectorAll('.nomor-undian'));
+
+  const btnUndiProses = document.querySelector('#pageUndian #btnUndi');
+
+  const popup = document.getElementById('popup');
+  const popupContent = document.getElementById('popupContent');
+  const winnerNameEl = document.getElementById('winnerName');
+  const officeCodeEl = document.getElementById('officeCode');
+  const lotteryNumberEl = document.getElementById('lotteryNumber');
+  const addressEl = document.getElementById('address');
+  const prizeNameEl = document.getElementById('prizeName');
+
+  const officeCodeContainer = document.getElementById('officeCodeContainer');
+  const lotteryNumberContainer = document.getElementById('lotteryNumberContainer');
+  const addressContainer = document.getElementById('addressContainer');
+
+  const closeBtn = document.getElementById('closeBtn');
+
+  const historyTableBody = document.getElementById('historyTableBody');
+  const btnExportXLSX = document.getElementById('btnExportXLSX');
+  const btnResetHistory = document.getElementById('btnResetHistory');
+
+  let pesertaList = [];
+  let historyList = JSON.parse(localStorage.getItem('historyUndian') || '[]');
+
+  // Navigasi halaman sederhana
+  function showPage(page) {
+    pageInput.classList.add('hidden');
+    pageUndian.classList.add('hidden');
+    pageHistory.classList.add('hidden');
+    btnInput.classList.remove('active');
+    btnUndian.classList.remove('active');
+    btnHistory.classList.remove('active');
+    if (page === 'input') {
+      pageInput.classList.remove('hidden');
+      btnInput.classList.add('active');
+    } else if (page === 'undian') {
+      pageUndian.classList.remove('hidden');
+      btnUndian.classList.add('active');
+    } else if (page === 'history') {
+      pageHistory.classList.remove('hidden');
+      btnHistory.classList.add('active');
+      renderHistory();
+    }
+  }
+  btnInput.addEventListener('click', () => showPage('input'));
+  btnUndian.addEventListener('click', () => showPage('undian'));
+  btnHistory.addEventListener('click', () => showPage('history'));
+
+  showPage('input');
+
+  // Import CSV peserta
+  csvFile.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const text = evt.target.result;
+      parseCSV(text);
+    };
+    reader.readAsText(file);
+  });
+
+  function parseCSV(text) {
+    pesertaList = [];
+    const lines = text.split(/\r?\n/);
+    let startLine = 0;
+    if (lines[0].toLowerCase().includes('kode kantor') || lines[0].toLowerCase().includes('nama')) {
+      startLine = 1;
+    }
+    for (let i = startLine; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      const parts = line.split(',');
+      if(parts.length < 4) continue;
+      const [kodeKantor, nomorUndian, nama, alamat] = parts;
+      pesertaList.push({
+        kodeKantor: kodeKantor.trim(),
+        nomorUndian: nomorUndian.trim(),
+        nama: nama.trim(),
+        alamat: alamat.trim()
+      });
+    }
+    renderPeserta();
+  }
+
+  function renderPeserta() {
+    if (pesertaList.length === 0) {
+      listPesertaBody.innerHTML = '<tr><td colspan="5" style="text-align:center; font-style:italic;">Belum ada peserta</td></tr>';
+      return;
+    }
+    let html = '';
+    pesertaList.forEach((p,i) => {
+      html += `<tr>
+        <td>${i+1}</td>
+        <td>${p.kodeKantor}</td>
+        <td>${p.nomorUndian}</td>
+        <td>${p.nama}</td>
+        <td>${p.alamat}</td>
+      </tr>`;
+    });
+    listPesertaBody.innerHTML = html;
+  }
+
+  // Fungsi baca input kode kantor & nomor undian
+  function getInputKodeKantor() {
+    return kodeKantorInputs.map(i => i.value.trim().toUpperCase()).join('');
+  }
+  function getInputNomorUndian() {
+    return nomorUndianInputs.map(i => i.value.trim().toUpperCase()).join('');
+  }
+
+  // Func animasi nama pemenang dengan random char
+  function randomChar() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    return chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  function animateWinnerName(finalName, duration) {
+    return new Promise(resolve => {
+      const intervalTime = 50;
+      const iterations = duration / intervalTime;
+      let currentIteration = 0;
+      const letters = finalName.toUpperCase().split('');
+      const animInterval = setInterval(() => {
+        let display = '';
+        for (let i = 0; i < letters.length; i++) {
+          if (currentIteration / iterations > i / letters.length) {
+            display += letters[i];
+          } else {
+            display += randomChar();
+          }
+        }
+        winnerNameEl.textContent = display;
+        currentIteration++;
+        if (currentIteration > iterations) {
+          clearInterval(animInterval);
+          winnerNameEl.textContent = finalName.toUpperCase();
+          resolve();
+        }
+      }, intervalTime);
+    });
+  }
+
+  // Fireworks canvas setup
+  const canvas = document.getElementById('fireworksCanvas');
+  const ctx = canvas.getContext('2d');
+  let fireworks = [];
+  let animationFrameId;
+
+  function resizeCanvas() {
+    const rect = popupContent.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+  }
+
+  class Particle {
+    constructor(x, y, color) {
+      this.x = x;
+      this.y = y;
+      this.color = color;
+      this.radius = Math.random() * 3 + 2;
+      this.speedX = (Math.random() - 0.5) * 6;
+      this.speedY = (Math.random() - 0.5) * 6;
+      this.alpha = 1;
+      this.gravity = 0.05;
+      this.decay = 0.015 + Math.random() * 0.01;
+    }
+    update() {
+      this.speedY += this.gravity;
+      this.x += this.speedX;
+      this.y += this.speedY;
+      this.alpha -= this.decay;
+      if (this.alpha < 0) this.alpha = 0;
+    }
+    draw(ctx) {
+      ctx.save();
+      ctx.globalAlpha = this.alpha;
+      ctx.beginPath();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 8;
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  class Firework {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.particles = [];
+      this.done = false;
+      this.createParticles();
+    }
+    createParticles() {
+      const colors = ['#ff5252', '#ff4081', '#7c4dff', '#448aff', '#40c4ff', '#69f0ae', '#ffff8d', '#ffab40'];
+      const count = 30 + Math.floor(Math.random() * 20);
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      for (let i=0; i<count; i++) {
+        this.particles.push(new Particle(this.x, this.y, color));
+      }
+    }
+    update() {
+      this.particles.forEach(p => p.update());
+      this.particles = this.particles.filter(p => p.alpha > 0);
+      if (this.particles.length === 0) this.done = true;
+    }
+    draw(ctx) {
+      this.particles.forEach(p => p.draw(ctx));
+    }
+    isDone() {
+      return this.done;
+    }
+  }
+
+  function createFireworks() {
+    for (let i=0; i<5; i++) {
+      const rect = popupContent.getBoundingClientRect();
+      const x = Math.random() * rect.width;
+      const y = Math.random() * rect.height / 2;
+      fireworks.push(new Firework(x, y));
+    }
+  }
+
+  function animateFireworks() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    fireworks.forEach(fw => {
+      fw.update();
+      fw.draw(ctx);
+    });
+    fireworks = fireworks.filter(fw => !fw.isDone());
+    if (fireworks.length === 0) {
+      createFireworks();
+    }
+    animationFrameId = requestAnimationFrame(animateFireworks);
+  }
+
+  window.addEventListener('resize', () => {
+    if (popup.style.display === 'flex') {
+      resizeCanvas();
+    }
+  });
+
+// Tombol Proses Undian
+btnUndiProses.addEventListener('click', () => {
+    const kategori = kategoriHadiahSelect.value;
+    if (!kategori) {
+        alert('Pilih kategori hadiah terlebih dahulu.');
+        return;
+    }
+    const kodeKantor = getInputKodeKantor();
+    const nomorUndian = getInputNomorUndian();
+    if (kodeKantor.length !== 2 || nomorUndian.length !== 4) {
+        alert('Masukkan kode kantor (2 karakter) dan nomor undian (4 karakter) dengan lengkap.');
+        return;
+    }
+    const pemenang = pesertaList.find(p =>
+        p.kodeKantor.toUpperCase() === kodeKantor &&
+        p.nomorUndian.toUpperCase() === nomorUndian
+    );
+    if (!pemenang) {
+        alert('Peserta dengan kode kantor dan nomor undian tersebut tidak ditemukan.');
+        return;
+    }
+
+    // Cek apakah peserta sudah pernah mendapatkan hadiah tertentu
+    const kategoriHadiahDihapus = [
+        "Uang Tunai 300 ribu",
+        "Televisi",
+        "Kulkas",
+        "Sepeda Motor"
+    ];
+
+    const sudahMenang = historyList.some(h => 
+        h.nomorUndian === pemenang.nomorUndian && 
+        kategoriHadiahDihapus.includes(h.kategoriHadiah)
+    );
+
+    if (sudahMenang) {
+        alert('Peserta sudah pernah mendapatkan hadiah');
+        return;
+    }
+
+    // Simpan riwayat
+    const waktuUndiISO = new Date().toISOString();
+    const waktuUndi = new Date().toLocaleString('id-ID');
+    const winnerRecord = {
+        kodeKantor: pemenang.kodeKantor,
+        nomorUndian: pemenang.nomorUndian,
+        nama: pemenang.nama,
+        alamat: pemenang.alamat,
+        kategoriHadiah: kategori,
+        waktuUndi: waktuUndi,
+        waktuUndiISO: waktuUndiISO
+    };
+    historyList.push(winnerRecord);
+    localStorage.setItem('historyUndian', JSON.stringify(historyList));
+
+    // Tampilkan popup dan animasi
+    showWinnerPopup(winnerRecord);
+});
+
+  // Tampilkan popup hasil undian dengan animasi nama pemenang dan fireworks
+  function showWinnerPopup(winner) {
+    winnerNameEl.textContent = "";
+    officeCodeEl.textContent = "";
+    lotteryNumberEl.textContent = "";
+    addressEl.textContent = "";
+    prizeNameEl.textContent = "";
+
+    officeCodeContainer.classList.add('hidden');
+    lotteryNumberContainer.classList.add('hidden');
+    addressContainer.classList.add('hidden');
+
+    popup.style.display = 'flex';
+    popup.setAttribute('aria-hidden', 'false');
+    popupContent.focus();
+
+    resizeCanvas();
+    canvas.style.display = 'block';
+
+    // Sembunyikan tombol tutup sebelum animasi
+    closeBtn.style.display = 'none';
+
+    animateWinnerName(winner.nama, 5000).then(() => {
+      officeCodeEl.textContent = winner.kodeKantor;
+      lotteryNumberEl.textContent = winner.nomorUndian;
+      addressEl.textContent = winner.alamat;
+      prizeNameEl.textContent = `🎉 ${winner.kategoriHadiah} 🎉`;
+      officeCodeContainer.classList.remove('hidden');
+      lotteryNumberContainer.classList.remove('hidden');
+      addressContainer.classList.remove('hidden');
+
+      createFireworks();
+      animateFireworks();
+      closeBtn.style.display = 'block';
+    });
+  }
+
+  // Sembunyikan popup dan stop animasi
+  closeBtn.addEventListener('click', () => {
+    popup.style.display = 'none';
+    popup.setAttribute('aria-hidden', 'true');
+    if(animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
+    }
+    fireworks = [];
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.style.display = 'none';
+  });
+
+  // Render riwayat pemenang kedalam tabel
+  function renderHistory() {
+    if (historyList.length === 0) {
+      historyTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; font-style:italic;">Belum ada pemenang</td></tr>';
+      return;
+    }
+    // Urutkan terbalik berdasarkan waktu
+    historyList.sort((a,b) => new Date(b.waktuUndiISO) - new Date(a.waktuUndiISO));
+    historyTableBody.innerHTML = "";
+    historyList.forEach((h,i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i+1}</td>
+        <td>${h.kodeKantor}</td>
+        <td>${h.nomorUndian}</td>
+        <td>${h.nama}</td>
+        <td>${h.alamat}</td>
+        <td>${h.kategoriHadiah}</td>
+        <td>${h.waktuUndi}</td>
+      `;
+      historyTableBody.appendChild(tr);
+    });
+  }
+
+  // Export riwayat ke XLSX
+  btnExportXLSX.addEventListener('click', () => {
+    if (historyList.length === 0) {
+      alert('Belum ada riwayat pemenang untuk diekspor.');
+      return;
+    }
+    const wb = XLSX.utils.book_new();
+    const wsData = [
+      ['No', 'Kode Kantor', 'Nomor Undian', 'Nama Peserta', 'Alamat Peserta', 'Kategori Hadiah', 'Waktu Undi']
+    ];
+    historyList.forEach((h,i) => {
+      wsData.push([
+        i+1, h.kodeKantor, h.nomorUndian, h.nama, h.alamat, h.kategoriHadiah, h.waktuUndi
+      ]);
+    });
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    XLSX.utils.book_append_sheet(wb, ws, "Riwayat Undian");
+    XLSX.writeFile(wb, "riwayat_undian.xlsx");
+  });
+
+  // Reset riwayat
+  btnResetHistory.addEventListener('click', () => {
+    if (confirm('Yakin ingin menghapus seluruh riwayat pemenang? Tindakan ini tidak bisa dibatalkan.')) {
+      historyList = [];
+      localStorage.removeItem('historyUndian');
+      renderHistory();
+      alert('Riwayat pemenang telah direset.');
+    }
+  });
+
+  // Autofocus perpindahan input kode kantor & nomor undian
+  function setupInputAutoMove(inputs) {
+    inputs.forEach((input,i) => {
+      input.addEventListener('input', () => {
+        if (input.value.length >= input.maxLength) {
+          if (i < inputs.length - 1) inputs[i+1].focus();
+        }
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && input.value.length === 0 && i > 0) {
+          inputs[i-1].focus();
+        }
+      });
+    });
+  }
+  setupInputAutoMove(kodeKantorInputs);
+  setupInputAutoMove(nomorUndianInputs);
+
+</script>
+</body>
+</html>
+
